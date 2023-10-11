@@ -7,9 +7,9 @@ const gameboard = (function () {
     const MARKER_2 = "O";
 
     const gameArray = [
-        ["", "", ""],
-        ["", "", ""],
-        ["", "", ""]
+        [" ", " ", " "],
+        [" ", " ", " "],
+        [" ", " ", " "]
     ];
 
     const getMarker1 = function () {
@@ -35,12 +35,20 @@ const gameboard = (function () {
     const resetArray = function () {
         for (let i = 0; i < gameArray.length; i++) {
             for (let j = 0; j < gameArray[i].length; j++) {
-                gameArray[i][j] = "";
+                gameArray[i][j] = " ";
             }
         }
     }
 
-    return { getMarker1, getMarker2, getArray, addValue, resetArray };
+    const toString = function () {
+        let result = "";
+        for (let row of gameArray) {
+            result += `${row[0]} | ${row[1]} | ${row[2]}\n`;
+        }
+        return result;
+    }
+
+    return { getMarker1, getMarker2, getArray, addValue, resetArray, toString };
 
 })();
 
@@ -67,38 +75,64 @@ function createPlayer(name, marker) {
 const gameController = (function () {
     const player1 = createPlayer("Player 1", gameboard.getMarker1());
     const player2 = createPlayer("Player 2", gameboard.getMarker2());
+    const gameArray = gameboard.getArray();
 
     let gameEnded = false;
     let isTied = false;
-    let boardIsIncompleted = false;
-
     let currentPlayer = (Math.random() > 0.5) ? player1 : player2;
 
     const switchPlayer = function () {
         currentPlayer = currentPlayer === player1 ? player2 : player1;
     }
 
+    const isWinRound = function () {
+        return isWinRow(gameArray[0][0], gameArray[1][1], gameArray[2][2]) ||
+            isWinRow(gameArray[2][0], gameArray[1][1], gameArray[0][2]) ||
+            isWinRow(gameArray[0][0], gameArray[1][0], gameArray[2][0]) ||
+            isWinRow(gameArray[0][1], gameArray[1][1], gameArray[2][1]) ||
+            isWinRow(gameArray[0][2], gameArray[1][2], gameArray[2][2]) ||
+            isWinRow(gameArray[0][0], gameArray[0][1], gameArray[0][2]) ||
+            isWinRow(gameArray[1][0], gameArray[1][1], gameArray[1][2]) ||
+            isWinRow(gameArray[2][0], gameArray[2][1], gameArray[2][2]);
+    }
+
+    const isTieRound = function () {
+        for (let i = 0; i < gameArray.length; i++) {
+            for (let j = 0; j < gameArray.length; j++) {
+                if (gameArray[i][j] == " ") {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    const isWinRow = function (value1, value2, value3) {
+        return (value1 !== " " && value2 !== " " && value3 !== " ") && (value1 === value2 && value2 === value3);
+    }
+
     const playRound = function () {
+        console.log("WELCOME TO TIC-TAC-TOE CONSOLE GAME!!!!");
+        console.log("######################################\n");
+
         while (!gameEnded) {
-            console.log(`Current turn: ${currentPlayer.getName()}`);
-            console.table(gameboard.getArray());
+            console.log(`${currentPlayer.getName()}'s turn`);
+            console.log(gameboard.toString());
             let validPlay = false;
+
             do {
-                let position = prompt("Which x, y positions would you like to play (x, y)?: ")
+                let position = prompt("Which x, y positions would you like to play (x,y)?: ")
                 let [posX, posY] = position.split(",");
                 validPlay = gameboard.addValue(currentPlayer.getMarker(), posX, posY);
-
                 if (!validPlay) {
                     console.log(`There is already a marker at [${posX}, ${posY}]`);
                 }
             } while (!validPlay);
-            console.table(gameboard.getArray());
-            checkWin();
-            boardIsIncompleted = gameboard.getArray().some((row) => row.some(value => value === ""));
-            if (!gameEnded && !boardIsIncompleted) {
-                gameEnded = true;
-                isTied = true;
-            }
+
+            console.log(gameboard.toString());
+
+            gameEnded = isWinRound() || isTieRound();
+            isTied = !isWinRound && isTieRound();
 
             if (!gameEnded) {
                 switchPlayer();
@@ -111,33 +145,19 @@ const gameController = (function () {
             currentPlayer.incrementScore();
             console.log(`${currentPlayer.getName()} has won!`);
         }
+
         console.log(`${player1.getName()} has ${player1.getScore()} and ${player2.getName()} has ${player2.getScore()}`);
-        let newGame = prompt("Do you want to play another round? (y/n): ") === "y";
-        if (newGame) {
+
+        if (prompt("Do you want to play another round? (y/n): ") === "y") {
             gameboard.resetArray();
             gameEnded = false;
             isTied = false;
-            boardIsIncompleted = false;
             currentPlayer = (Math.random() > 0.5) ? player1 : player2;
             playRound();
         }
     }
 
-    const checkWin = function () {
-        const gameArray = gameboard.getArray();
-
-        if (((gameArray[0][0] !== "" && gameArray[1][1] !== "" && gameArray[2][2] !== "") && (gameArray[0][0] === gameArray[1][1] && gameArray[1][1] === gameArray[2][2])) ||
-            ((gameArray[2][0] !== "" && gameArray[1][1] !== "" && gameArray[0][2] !== "") && (gameArray[2][0] === gameArray[1][1] && gameArray[1][1] === gameArray[0][2])) ||
-            ((gameArray[0][0] !== "" && gameArray[1][0] !== "" && gameArray[2][0] !== "") && (gameArray[0][0] === gameArray[1][0] && gameArray[1][0] === gameArray[2][0])) ||
-            ((gameArray[0][1] !== "" && gameArray[1][1] !== "" && gameArray[2][1] !== "") && (gameArray[0][1] === gameArray[1][1] && gameArray[1][1] === gameArray[2][1])) ||
-            ((gameArray[0][2] !== "" && gameArray[1][2] !== "" && gameArray[2][2] !== "") && (gameArray[0][2] === gameArray[1][2] && gameArray[1][2] === gameArray[2][2])) ||
-            ((gameArray[0][0] !== "" && gameArray[0][1] !== "" && gameArray[0][2] !== "") && (gameArray[0][0] === gameArray[0][1] && gameArray[0][1] === gameArray[0][2])) ||
-            ((gameArray[1][0] !== "" && gameArray[1][1] !== "" && gameArray[1][2] !== "") && (gameArray[1][0] === gameArray[1][1] && gameArray[1][1] === gameArray[1][2])) ||
-            ((gameArray[2][0] !== "" && gameArray[2][1] !== "" && gameArray[2][2] !== "") && (gameArray[2][0] === gameArray[2][1] && gameArray[2][1] === gameArray[2][2]))) {
-            gameEnded = true;
-            isTied = false;
-        }
-    }
-
     return { playRound };
 })();
+
+gameController.playRound();
