@@ -170,10 +170,12 @@ const displayController = (function () {
     const player1Input = document.querySelector("#player1-name");
     const player2Input = document.querySelector("#player2-name");
     const board = document.querySelector(".board");
-    const btnStartGame = document.querySelector(".btn-start-game");
+    const btnStartGamePlayer = document.querySelector(".btn-player");
+    const btnStartGameComputer = document.querySelector(".btn-computer");
     const gameState = document.querySelector(".game-state");
     const gameArray = gameboard.getArray();
 
+    let vsComputer = false;
     let gameEnded = false;
     let isTied = false;
     let currentPlayer;
@@ -195,15 +197,23 @@ const displayController = (function () {
             }
         }
 
-        btnStartGame.addEventListener("click", startGame);
+        btnStartGamePlayer.addEventListener("click", startGame);
+        btnStartGameComputer.addEventListener("click", (e) => {
+            vsComputer = true;
+            startGame();
+        });
     }
 
     const startGame = function () {
         cleanBoard();
-        setPlayerNames();
+        setPlayerNames(vsComputer);
         currentPlayer = (Math.random() > 0.5) ? player1 : player2;
         setBoardDisabled(false);
         displayMessage(`${currentPlayer.getName()}'s turn`);
+
+        if (vsComputer && currentPlayer === player2) {
+            playRoundComputer();
+        }
     }
 
     const cleanBoard = function () {
@@ -261,8 +271,48 @@ const displayController = (function () {
         } else {
             switchPlayer();
             displayMessage(`${currentPlayer.getName()}'s turn`);
+            // If current player is computer, play computer round here
+            if (vsComputer) {
+                playRoundComputer();
+            }
         }
     };
+
+    const playRoundComputer = function () {
+        // Random move
+        let rowPos = -1;
+        let colPos = -1;
+        let cell = null;
+        do {
+            rowPos = getRandomIntInclusive(0, 2);
+            colPos = getRandomIntInclusive(0, 2);
+            cell = document.querySelector(`button[data-row="${rowPos}"][data-col="${colPos}"]`);
+        } while (cell.disabled);
+        cell.textContent = currentPlayer.getMarker();
+        cell.disabled = true;
+        gameboard.addValue(currentPlayer.getMarker(), rowPos, colPos);
+
+        gameEnded = isWinRound() || isTieRound();
+        isTied = !isWinRound() && isTieRound();
+
+        if (gameEnded && isTied) {
+            displayMessage("Game is tied!");
+            setBoardDisabled();
+        } else if (gameEnded) {
+            currentPlayer.incrementScore();
+            displayMessage(`${currentPlayer.getName()} has won!`);
+            setBoardDisabled();
+        } else {
+            switchPlayer();
+            displayMessage(`${currentPlayer.getName()}'s turn`);
+        }
+    }
+
+    const getRandomIntInclusive = function (min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1) + min);
+    }
 
     const isWinRound = function () {
         return isWinRow(gameArray[0][0], gameArray[1][1], gameArray[2][2]) ||

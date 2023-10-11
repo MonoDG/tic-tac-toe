@@ -64,7 +64,8 @@ main {
   justify-content: center;
 }
 
-.btn-start-game {
+.btn-player,
+.btn-computer {
   border: 1px solid black;
   background-color: antiquewhite;
   color: black;
@@ -72,7 +73,8 @@ main {
   box-shadow: 1px 0 0 0 black;
 }
 
-.btn-start-game:active {
+.btn-player:active,
+.btn-computer:active {
   box-shadow: none;
 }
 
