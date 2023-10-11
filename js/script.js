@@ -51,10 +51,14 @@ const gameboard = (function () {
 
 })();
 
-function createPlayer(name, marker) {
+function createPlayer(playerName, marker) {
     let score = 0;
+    let name = playerName;
     const getName = function () {
         return name;
+    }
+    const setName = function (playerName) {
+        name = playerName;
     }
     const getMarker = function () {
         return marker;
@@ -68,7 +72,7 @@ function createPlayer(name, marker) {
     const resetScore = function () {
         score = 0;
     }
-    return { getName, getMarker, getScore, incrementScore, resetScore };
+    return { getName, setName, getMarker, getScore, incrementScore, resetScore };
 }
 
 const gameController = (function () {
@@ -163,6 +167,8 @@ const gameController = (function () {
 const displayController = (function () {
     const player1 = createPlayer("Player 1", gameboard.getMarker1());
     const player2 = createPlayer("Player 2", gameboard.getMarker2());
+    const player1Input = document.querySelector("#player1-name");
+    const player2Input = document.querySelector("#player2-name");
     const board = document.querySelector(".board");
     const btnStartGame = document.querySelector(".btn-start-game");
     const gameState = document.querySelector(".game-state");
@@ -194,6 +200,7 @@ const displayController = (function () {
 
     const startGame = function () {
         cleanBoard();
+        setPlayerNames();
         currentPlayer = (Math.random() > 0.5) ? player1 : player2;
         setBoardDisabled(false);
         displayMessage(`${currentPlayer.getName()}'s turn`);
@@ -210,6 +217,27 @@ const displayController = (function () {
 
     const setBoardDisabled = function (disabled = true) {
         board.childNodes.forEach(button => button.disabled = disabled);
+    }
+
+    const setPlayerNames = function (vsComputer = false) {
+        let player1Name = player1Input.value;
+        let player2Name = player2Input.value;
+
+        if (player1Name !== "") {
+            player1.setName(player1Name);
+        } else {
+            player1.setName("Player 1");
+        }
+
+        if (vsComputer) {
+            player2.setName("Computer");
+        } else {
+            if (player2Name !== "") {
+                player2.setName(player2Name);
+            } else {
+                player2.setName("Player 2");
+            }
+        }
     }
 
     const playRound = function (e) {
