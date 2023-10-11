@@ -174,11 +174,15 @@ const displayController = (function () {
     }
 
     const initializeBoard = function () {
-        for (let row of gameArray) {
-            for (let value of row) {
+        for (let rowIndex in gameArray) {
+            for (let colIndex in gameArray[rowIndex]) {
                 const cell = document.createElement("button");
+                cell.setAttribute("data-row", rowIndex);
+                cell.setAttribute("data-col", colIndex);
                 cell.classList.add("cell");
-                cell.addEventListener("click", (e) => console.log(e.target.getAttribute("data-rowcol")));
+                cell.addEventListener("click", (e) => {
+                    console.log(`Row: ${e.target.getAttribute("data-row")} Col: ${e.target.getAttribute("data-col")}`);
+                });
                 boardDOM.appendChild(cell);
             }
         }
