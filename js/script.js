@@ -163,7 +163,8 @@ const displayController = (function () {
     const player1 = createPlayer("Player 1", gameboard.getMarker1());
     const player2 = createPlayer("Player 2", gameboard.getMarker2());
     const board = document.querySelector(".board");
-    const playerData = document.querySelector(".player-data");
+    const btnStartGame = document.querySelector(".btn-start-game");
+    const gameState = document.querySelector(".game-state");
     const gameArray = gameboard.getArray();
 
     let gameEnded = false;
@@ -180,11 +181,23 @@ const displayController = (function () {
                 const cell = document.createElement("button");
                 cell.setAttribute("data-row", rowIndex);
                 cell.setAttribute("data-col", colIndex);
+                cell.disabled = true;
                 cell.classList.add("cell");
                 cell.addEventListener("click", playRound);
                 board.appendChild(cell);
             }
         }
+
+        btnStartGame.addEventListener("click", startGame);
+    }
+
+    const startGame = function () {
+        board.childNodes.forEach(button => button.disabled = false);
+        displayTurn();
+    }
+
+    const displayTurn = function () {
+        gameState.textContent = `${currentPlayer.getName()}'s turn`;
     }
 
     const playRound = function (e) {
@@ -192,6 +205,7 @@ const displayController = (function () {
         cell.textContent = currentPlayer.getMarker();
         cell.disabled = true;
         switchPlayer();
+        displayTurn();
     };
 
     return { initializeBoard };
