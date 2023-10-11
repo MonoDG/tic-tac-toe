@@ -1,5 +1,6 @@
 // Main goal: To have as little global code as possible
 
+// TODO check win inside gameboard
 const gameboard = (function () {
     const MARKER_1 = "X";
     const MARKER_2 = "O";
@@ -194,8 +195,8 @@ const displayController = (function () {
     const startGame = function () {
         cleanBoard();
         currentPlayer = (Math.random() > 0.5) ? player1 : player2;
-        board.childNodes.forEach(button => button.disabled = false);
-        displayTurn();
+        setBoardDisabled(false);
+        displayMessage(`${currentPlayer.getName()}'s turn`);
     }
 
     const cleanBoard = function () {
@@ -203,17 +204,63 @@ const displayController = (function () {
         board.childNodes.forEach(button => button.textContent = " ");
     }
 
-    const displayTurn = function () {
-        gameState.textContent = `${currentPlayer.getName()}'s turn`;
+    const displayMessage = function (message) {
+        gameState.textContent = message;
+    }
+
+    const setBoardDisabled = function (disabled = true) {
+        board.childNodes.forEach(button => button.disabled = disabled);
     }
 
     const playRound = function (e) {
         const cell = e.target;
         cell.textContent = currentPlayer.getMarker();
         cell.disabled = true;
-        switchPlayer();
-        displayTurn();
+        const rowPos = cell.getAttribute("data-row");
+        const colPos = cell.getAttribute("data-col");
+        gameboard.addValue(currentPlayer.getMarker(), rowPos, colPos);
+
+        gameEnded = isWinRound() || isTieRound();
+        isTied = !isWinRound() && isTieRound();
+
+        if (gameEnded && isTied) {
+            displayMessage("Game is tied!");
+            setBoardDisabled();
+        } else if (gameEnded) {
+            currentPlayer.incrementScore();
+            displayMessage(`${currentPlayer.getName()} has won!`);
+            setBoardDisabled();
+        } else {
+            switchPlayer();
+            displayMessage(`${currentPlayer.getName()}'s turn`);
+        }
     };
+
+    const isWinRound = function () {
+        return isWinRow(gameArray[0][0], gameArray[1][1], gameArray[2][2]) ||
+            isWinRow(gameArray[2][0], gameArray[1][1], gameArray[0][2]) ||
+            isWinRow(gameArray[0][0], gameArray[1][0], gameArray[2][0]) ||
+            isWinRow(gameArray[0][1], gameArray[1][1], gameArray[2][1]) ||
+            isWinRow(gameArray[0][2], gameArray[1][2], gameArray[2][2]) ||
+            isWinRow(gameArray[0][0], gameArray[0][1], gameArray[0][2]) ||
+            isWinRow(gameArray[1][0], gameArray[1][1], gameArray[1][2]) ||
+            isWinRow(gameArray[2][0], gameArray[2][1], gameArray[2][2]);
+    }
+
+    const isTieRound = function () {
+        for (let i = 0; i < gameArray.length; i++) {
+            for (let j = 0; j < gameArray.length; j++) {
+                if (gameArray[i][j] == " ") {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    const isWinRow = function (value1, value2, value3) {
+        return (value1 !== " " && value2 !== " " && value3 !== " ") && (value1 === value2 && value2 === value3);
+    }
 
     return { initializeBoard };
 
