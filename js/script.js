@@ -1,6 +1,4 @@
-// Store the gameboard as an array inside of a Gameboard object
-// Store player in objects
-// Object to control the flow of the game itself
+// Main goal: To have as little global code as possible
 
 const gameboard = (function () {
     const MARKER_1 = "X";
@@ -160,4 +158,39 @@ const gameController = (function () {
     return { playRound };
 })();
 
-gameController.playRound();
+
+const displayController = (function () {
+    const player1 = createPlayer("Player 1", gameboard.getMarker1());
+    const player2 = createPlayer("Player 2", gameboard.getMarker2());
+    const boardDOM = document.querySelector(".board");
+    const gameArray = gameboard.getArray();
+
+    let gameEnded = false;
+    let isTied = false;
+    let currentPlayer = (Math.random() > 0.5) ? player1 : player2;
+
+    const switchPlayer = function () {
+        currentPlayer = currentPlayer === player1 ? player2 : player1;
+    }
+
+    const initializeBoard = function () {
+        for (let row of gameArray) {
+            for (let value of row) {
+                const cell = document.createElement("button");
+                cell.classList.add("cell");
+                cell.addEventListener("click", (e) => console.log(e.target.getAttribute("data-rowcol")));
+                boardDOM.appendChild(cell);
+            }
+        }
+    }
+
+    const playRound = function () {
+        initializeBoard();
+    };
+
+    return { playRound };
+
+})();
+
+displayController.playRound();
+// gameController.playRound();

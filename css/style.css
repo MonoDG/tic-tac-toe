@@ -3,3 +3,28 @@
   padding: 0;
   box-sizing: border-box;
 }
+
+body {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  height: 100vh;
+  background-color: black;
+  justify-content: center;
+  align-items: center;
+  color: antiquewhite;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.board {
+  width: 500px;
+  height: 500px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  background-color: gray;
+}
+
+.cell {
+  background-color: antiquewhite;
+}
