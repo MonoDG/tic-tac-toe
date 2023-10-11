@@ -169,7 +169,7 @@ const displayController = (function () {
 
     let gameEnded = false;
     let isTied = false;
-    let currentPlayer = (Math.random() > 0.5) ? player1 : player2;
+    let currentPlayer;
 
     const switchPlayer = function () {
         currentPlayer = currentPlayer === player1 ? player2 : player1;
@@ -192,8 +192,15 @@ const displayController = (function () {
     }
 
     const startGame = function () {
+        cleanBoard();
+        currentPlayer = (Math.random() > 0.5) ? player1 : player2;
         board.childNodes.forEach(button => button.disabled = false);
         displayTurn();
+    }
+
+    const cleanBoard = function () {
+        gameboard.resetArray();
+        board.childNodes.forEach(button => button.textContent = " ");
     }
 
     const displayTurn = function () {
