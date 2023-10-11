@@ -33,7 +33,7 @@ main {
 .player-data {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  justify-content: space-between;
 }
 
 .player-data div {
@@ -56,6 +56,24 @@ main {
 
 .player-data input:focus {
   outline: none;
+}
+
+.game-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-start-game {
+  border: 1px solid black;
+  background-color: antiquewhite;
+  color: black;
+  padding: 15px;
+  box-shadow: 1px 0 0 0 black;
+}
+
+.btn-start-game:active {
+  box-shadow: none;
 }
 
 .board {
