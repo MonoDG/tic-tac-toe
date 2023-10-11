@@ -162,7 +162,8 @@ const gameController = (function () {
 const displayController = (function () {
     const player1 = createPlayer("Player 1", gameboard.getMarker1());
     const player2 = createPlayer("Player 2", gameboard.getMarker2());
-    const boardDOM = document.querySelector(".board");
+    const board = document.querySelector(".board");
+    const playerData = document.querySelector(".player-data");
     const gameArray = gameboard.getArray();
 
     let gameEnded = false;
@@ -180,21 +181,22 @@ const displayController = (function () {
                 cell.setAttribute("data-row", rowIndex);
                 cell.setAttribute("data-col", colIndex);
                 cell.classList.add("cell");
-                cell.addEventListener("click", (e) => {
-                    console.log(`Row: ${e.target.getAttribute("data-row")} Col: ${e.target.getAttribute("data-col")}`);
-                });
-                boardDOM.appendChild(cell);
+                cell.addEventListener("click", playRound);
+                board.appendChild(cell);
             }
         }
     }
 
-    const playRound = function () {
-        initializeBoard();
+    const playRound = function (e) {
+        const cell = e.target;
+        cell.textContent = currentPlayer.getMarker();
+        cell.disabled = true;
+        switchPlayer();
     };
 
-    return { playRound };
+    return { initializeBoard };
 
 })();
 
-displayController.playRound();
+displayController.initializeBoard();
 // gameController.playRound();

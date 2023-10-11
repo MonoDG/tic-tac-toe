@@ -9,13 +9,27 @@
 </head>
 
 <body>
-  <header>
-    <h1>TIC-TAC-TOE</h1>
-  </header>
+  <section class="left-side"></section>
   <main>
-    <section class="board">
+    <header>
+      <h1>TIC-TAC-TOE</h1>
+    </header>
+    <section class="game-data">
+      <section class="player-data">
+        <div>
+          <label class="bold" for="player1-name">Player 1 (X):</label>
+          <input type="text" name="player1-name" id="player1-name">
+        </div>
+        <div>
+          <label class="bold" for="player2-name">Player 2 (O):</label>
+          <input type="text" name="player2-name" id="player2-name">
+        </div>
+      </section>
+      <section class="game-state"></section>
     </section>
+    <section class="board"></section>
   </main>
+  <section class="right-side"></section>
   <script src="js/script.js"></script>
 </body>
 
