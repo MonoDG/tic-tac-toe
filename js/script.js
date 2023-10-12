@@ -263,8 +263,8 @@ const displayController = (function () {
         const colPos = cell.getAttribute("data-col");
         gameboard.addValue(currentPlayer.getMarker(), rowPos, colPos);
 
-        gameEnded = isWinRound() || isTieRound();
-        isTied = !isWinRound() && isTieRound();
+        gameEnded = isWinRound(gameArray, player1.getMarker()) || isWinRound(gameArray, player2.getMarker()) || isTieRound(gameArray);
+        isTied = (!isWinRound(gameArray, player1.getMarker()) && !isWinRound(gameArray, player2.getMarker())) && isTieRound(gameArray);
 
         if (gameEnded && isTied) {
             displayMessage("Game is tied!");
@@ -297,10 +297,10 @@ const displayController = (function () {
             }
         }
 
-        negamax(gameArrayCopy, currentPlayer, true);
+        negamax(gameArrayCopy, currentPlayer.getMarker(), true);
 
-        gameEnded = isWinRound() || isTieRound();
-        isTied = !isWinRound() && isTieRound();
+        gameEnded = isWinRound(gameArray, player1.getMarker()) || isWinRound(gameArray, player2.getMarker()) || isTieRound(gameArray);
+        isTied = (!isWinRound(gameArray, player1.getMarker()) && !isWinRound(gameArray, player2.getMarker())) && isTieRound(gameArray);
 
         if (gameEnded && isTied) {
             displayMessage("Game is tied!");
@@ -315,21 +315,21 @@ const displayController = (function () {
         }
     }
 
-    const isWinRound = function () {
-        return isWinRow(gameArray[0][0], gameArray[1][1], gameArray[2][2]) ||
-            isWinRow(gameArray[2][0], gameArray[1][1], gameArray[0][2]) ||
-            isWinRow(gameArray[0][0], gameArray[1][0], gameArray[2][0]) ||
-            isWinRow(gameArray[0][1], gameArray[1][1], gameArray[2][1]) ||
-            isWinRow(gameArray[0][2], gameArray[1][2], gameArray[2][2]) ||
-            isWinRow(gameArray[0][0], gameArray[0][1], gameArray[0][2]) ||
-            isWinRow(gameArray[1][0], gameArray[1][1], gameArray[1][2]) ||
-            isWinRow(gameArray[2][0], gameArray[2][1], gameArray[2][2]);
+    const isWinRound = function (board, marker) {
+        return isWinRow(board[0][0], board[1][1], board[2][2], marker) ||
+            isWinRow(board[2][0], board[1][1], board[0][2], marker) ||
+            isWinRow(board[0][0], board[1][0], board[2][0], marker) ||
+            isWinRow(board[0][1], board[1][1], board[2][1], marker) ||
+            isWinRow(board[0][2], board[1][2], board[2][2], marker) ||
+            isWinRow(board[0][0], board[0][1], board[0][2], marker) ||
+            isWinRow(board[1][0], board[1][1], board[1][2], marker) ||
+            isWinRow(board[2][0], board[2][1], board[2][2], marker);
     }
 
-    const isTieRound = function () {
-        for (let i = 0; i < gameArray.length; i++) {
-            for (let j = 0; j < gameArray.length; j++) {
-                if (gameArray[i][j] == " ") {
+    const isTieRound = function (board) {
+        for (let i = 0; i < board.length; i++) {
+            for (let j = 0; j < board.length; j++) {
+                if (board[i][j] == " ") {
                     return false;
                 }
             }
@@ -337,25 +337,25 @@ const displayController = (function () {
         return true;
     }
 
-    const isWinRow = function (value1, value2, value3) {
-        return (value1 !== " " && value2 !== " " && value3 !== " ") && (value1 === value2 && value2 === value3);
+    const isWinRow = function (value1, value2, value3, marker) {
+        return (value1 === marker && value2 === marker && value3 === marker);
     }
 
     // Negamax algorithm
-    const negamax = function (board, player, move = false) {
+    const negamax = function (board, marker, move = false) {
 
-        let opponentPlayer;
-        if (player === player2) {
-            opponentPlayer = player1;
+        let opponentMarker;
+        if (marker === gameboard.getMarker1()) {
+            opponentMarker = gameboard.getMarker2();
         } else {
-            opponentPlayer = player2;
+            opponentMarker = gameboard.getMarker1();
         }
 
-        if (isWinRound() && player === player2) {
+        if (isWinRound(board, marker)) {
             return 1;
-        } else if (isWinRound() && player === player1) {
+        } else if (isWinRound(board, opponentMarker)) {
             return -1;
-        } else if (isTieRound()) {
+        } else if (isTieRound(board)) {
             return 0;
         }
 
@@ -366,9 +366,9 @@ const displayController = (function () {
 
         for (let i = 0; i < board.length; ++i) {
             for (let j = 0; j < board.length; ++j) {
-                if (gameArray[i][j] === " ") {
-                    board[i][j] = player.getMarker();
-                    let m = -negamax(opponentPlayer);
+                if (board[i][j] === " ") {
+                    board[i][j] = marker;
+                    let m = -negamax(board, opponentMarker);
                     if (m > max) {
                         max = m;
                         maxi = i;
