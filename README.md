@@ -2,4 +2,4 @@
 
 The Odin Project
 
-[GitHub Page]()
+[GitHub Page](https://monodg.github.io/tic-tac-toe/)
