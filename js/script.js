@@ -197,14 +197,19 @@ const displayController = (function () {
             }
         }
 
-        btnStartGamePlayer.addEventListener("click", startGame);
-        btnStartGameComputer.addEventListener("click", (e) => {
+        btnStartGamePlayer.addEventListener("click", e => {
+            vsComputer = false;
+            startGame();
+        });
+        btnStartGameComputer.addEventListener("click", e => {
             vsComputer = true;
             startGame();
         });
     }
 
     const startGame = function () {
+        gameEnded = false;
+        isTied = false;
         cleanBoard();
         setPlayerNames(vsComputer);
         currentPlayer = (Math.random() > 0.5) ? player1 : player2;
@@ -279,18 +284,20 @@ const displayController = (function () {
     };
 
     const playRoundComputer = function () {
-        // Random move
-        let rowPos = -1;
-        let colPos = -1;
-        let cell = null;
-        do {
-            rowPos = getRandomIntInclusive(0, 2);
-            colPos = getRandomIntInclusive(0, 2);
-            cell = document.querySelector(`button[data-row="${rowPos}"][data-col="${colPos}"]`);
-        } while (cell.disabled);
-        cell.textContent = currentPlayer.getMarker();
-        cell.disabled = true;
-        gameboard.addValue(currentPlayer.getMarker(), rowPos, colPos);
+        // Negamax minmax algorithm
+        let gameArrayCopy = [
+            [" ", " ", " "],
+            [" ", " ", " "],
+            [" ", " ", " "]
+        ];
+
+        for (let i = 0; i < gameArray.length; i++) {
+            for (let j = 0; j < gameArray.length; j++) {
+                gameArrayCopy[i][j] = gameArray[i][j];
+            }
+        }
+
+        negamax(gameArrayCopy, currentPlayer, true);
 
         gameEnded = isWinRound() || isTieRound();
         isTied = !isWinRound() && isTieRound();
@@ -306,12 +313,6 @@ const displayController = (function () {
             switchPlayer();
             displayMessage(`${currentPlayer.getName()}'s turn`);
         }
-    }
-
-    const getRandomIntInclusive = function (min, max) {
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min + 1) + min);
     }
 
     const isWinRound = function () {
@@ -338,6 +339,54 @@ const displayController = (function () {
 
     const isWinRow = function (value1, value2, value3) {
         return (value1 !== " " && value2 !== " " && value3 !== " ") && (value1 === value2 && value2 === value3);
+    }
+
+    // Negamax algorithm
+    const negamax = function (board, player, move = false) {
+
+        let opponentPlayer;
+        if (player === player2) {
+            opponentPlayer = player1;
+        } else {
+            opponentPlayer = player2;
+        }
+
+        if (isWinRound() && player === player2) {
+            return 1;
+        } else if (isWinRound() && player === player1) {
+            return -1;
+        } else if (isTieRound()) {
+            return 0;
+        }
+
+        let max;
+        let maxi;
+        let maxj;
+        max = -2;
+
+        for (let i = 0; i < board.length; ++i) {
+            for (let j = 0; j < board.length; ++j) {
+                if (gameArray[i][j] === " ") {
+                    board[i][j] = player.getMarker();
+                    let m = -negamax(opponentPlayer);
+                    if (m > max) {
+                        max = m;
+                        maxi = i;
+                        maxj = j;
+                    }
+                    board[i][j] = " ";
+                }
+            }
+        }
+
+        if (move) {
+            let cell = document.querySelector(`button[data-row="${maxi}"][data-col="${maxj}"]`);
+            cell.textContent = currentPlayer.getMarker();
+            cell.disabled = true;
+            gameboard.addValue(currentPlayer.getMarker(), maxi, maxj);
+        }
+
+        return max;
     }
 
     return { initializeBoard };
